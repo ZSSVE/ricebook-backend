@@ -1,0 +1,26 @@
+{
+  "name": "stub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/.bin/jasmine-node  app_server",
+    "autotest": "./node_modules/.bin/jasmine-node --color --output testresults --junitreport --autotest app_server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "cookie-parser": "^1.4.1",
+    "express": "^4.13.4",
+    "md5": "^2.1.0",
+    "mongoose": "^4.4.10",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "request": "^2.69.0"
+  }
+}

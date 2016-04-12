@@ -1,0 +1,178 @@
+// It contain stubs for authorization functionality.
+exports.setup = function (app) {
+    app.post('/login', login);
+    app.put('/logout', isLoggedIn, logout);
+    app.post('/register', register);
+    app.put('/password', isLoggedIn, setPassword);
+    app.get('/authFacebook', passport.authenticate('facebook', {scope: 'email'}));
+    app.get('/callback', passport.authenticate('facebook', {successRedirect: '/profile', failureRedirect: '/fail'}));
+    app.get('/profile', isLoggedIn, profile);
+    app.get('/fail', fail)
+};
+
+var User = require('./model.js').User;
+var Profile = require('./model.js').Profile;
+var crypto = require('crypto');
+var md5 = require('md5');
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
+var _cookieKey = 'sid';
+var _sessionUser = {};
+var port = "3000";
+var defaultAvatar = "https://tracker.moodle.org/secure/attachment/30912/f3.png";
+var defaultStatus = "Becoming a Web Developer!";
+
+function register(req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+    var salt = crypto.randomBytes(16).toString('hex');
+    var saltedHash = getHash(username, password, salt);
+
+    //User.remove({}, function(err) {
+    //    console.log('********** collection User removed**********')
+    //});
+    //Profile.remove({}, function(err) {
+    //    console.log('********** collection Profile removed**********')
+    //});
+
+    new User({username: username, salt: salt, hash: saltedHash}).save(function (err, result) {
+        console.log('done with save new user', username, "result: ", result)
+    });
+    new Profile({
+        username: username,
+        status: defaultStatus,
+        following: [],
+        email: req.body.email,
+        zipcode: req.body.zipcode,
+        picture: defaultAvatar
+    }).save(function (err, result) {
+        console.log('done with save new user profile', username, "result: ", result)
+    });
+
+    User.find({}, function (err, result) {
+        console.log("all users:", result)
+    });//TODO remove
+    Profile.find({}, function (err, result) {
+        console.log("all profiles", result)
+    });//TODO remove
+
+    res.send({username: username, result: "success"})
+
+}
+
+function login(req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+
+    // Bad request
+    if (!username || !password) {
+        res.sendStatus(400);
+        return
+    }
+
+    User.find({username: username}, function (err, userObjs) {
+        // Unauthorized request.
+        var userObj = userObjs[0];
+        if (!userObj || getHash(username, password, userObj.salt) !== userObj.hash) {
+            res.sendStatus(401);
+            console.log("State: Unauthorized!");
+            return
+        }
+
+        // Success login
+        console.log("State: Success!");
+        var sessionKey = getHash(new Date().getTime() + userObj.username);
+        _sessionUser[sessionKey] = username;
+
+        // Set cookie
+        res.cookie(_cookieKey, sessionKey, {maxAge: 3600 * 1000, httpOnly: true});
+
+        res.send({
+            "username": username,
+            "result": "success"
+        })
+    });
+}
+
+function isLoggedIn(req, res, next) {
+    console.log("Checking if logged in...");
+    var sessionKey = req.cookies[_cookieKey];
+
+    if (req.isAuthenticated()) {
+        return next();
+    } else if (!sessionKey) {
+        return res.sendStatus(401); // Unauthorized
+    }
+
+    var username = _sessionUser[sessionKey];
+    if (username) {
+        req.user = username;
+        return next()
+    } else {
+        res.sendStatus(401);
+    }
+}
+
+function setPassword(req, res) {
+    // Middleware isLoggedIn assures that the user has already logged in.
+    var username = req.user;
+    var newPassword = req.body.password;
+    var salt = crypto.randomBytes(16).toString('hex');
+    var newHash = getHash(username, newPassword, salt);
+    User.update({username: username}, {$set: {hash: newHash, salt: salt}}, function (err) {
+        if (err) {
+            return handleError(err)
+        }
+        var msg = {"username": username, "status": 'New password is saved!'};
+        res.send(msg);
+    });
+}
+
+// Remove the user information stored and clear cookie.
+function logout(req, res) {
+    //req.logout();
+    var sessionKey = req.cookies[_cookieKey];
+    delete _sessionUser[sessionKey];
+    res.clearCookie(_cookieKey);
+    res.send("OK");
+}
+
+function getHash() {
+    var args = Array.prototype.slice.call(arguments);
+    return md5(args.join(":"))
+}
+
+
+// Facebook login
+var users = {};
+var config = {
+    clientID: '636790953145162',
+    clientSecret: '6ea79c5a2d31f6ddc66451c7b40ef163',
+    callbackURL: 'http://localhost:' + port + '/callback'
+};
+
+passport.serializeUser(function (user, done) {
+    users[user.id] = user;
+    done(null, user.id)
+});
+
+passport.deserializeUser(function (id, done) {
+    var user = users[id];
+    done(null, user)
+});
+passport.use(new FacebookStrategy(config,
+    function (token, refreshToken, profile, done) {
+        process.nextTick(function () {
+            return done(null, profile)
+        })
+    }));
+
+function profile(req, res) {
+    res.send('ok now what?', req.user)
+}
+function fail(req, res) {
+    res.send("Failed!")
+}
+exports.isLoggedIn = isLoggedIn;
+
+exports.getHash = getHash;

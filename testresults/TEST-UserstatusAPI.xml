@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="User status API" errors="0" tests="2" failures="0" time="0.028" timestamp="2016-03-25T01:20:59">
+  <testcase classname="User status API" name="gives three statuses of three users" time="0.015"></testcase>
+  <testcase classname="User status API" name="gets the status of the current user and then changes the status" time="0.013"></testcase>
+</testsuite>
+</testsuites>

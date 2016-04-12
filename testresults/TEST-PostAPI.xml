@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Post API" errors="0" tests="4" failures="0" time="0.152" timestamp="2016-03-25T01:20:59">
+  <testcase classname="Post API" name="gives three or more posts upon request" time="0.054"></testcase>
+  <testcase classname="Post API" name="sets posts with successive post ids, and returns the post each time" time="0.064"></testcase>
+  <testcase classname="Post API" name="returns a post with a specified id" time="0.016"></testcase>
+  <testcase classname="Post API" name="returns nothing for an invalid id" time="0.014"></testcase>
+</testsuite>
+</testsuites>

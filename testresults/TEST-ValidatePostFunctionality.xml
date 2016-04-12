@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Validate Post Functionality" errors="0" tests="4" failures="0" time="0.164" timestamp="2016-03-24T17:39:51">
+  <testcase classname="Validate Post Functionality" name="should give me three or more posts" time="0.068"></testcase>
+  <testcase classname="Validate Post Functionality" name="should add two posts with successive post ids, and return the post each time" time="0.064"></testcase>
+  <testcase classname="Validate Post Functionality" name="should return a post with a specified id" time="0.013"></testcase>
+  <testcase classname="Validate Post Functionality" name="should return nothing for an invalid id" time="0.014"></testcase>
+</testsuite>
+</testsuites>
