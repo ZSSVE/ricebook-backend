@@ -20,7 +20,8 @@
     "morgan": "^1.7.0",
     "request": "^2.69.0",
     "express-session": "^1.13.0",
-    "passport":"^0.3.2"
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.0"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5",
