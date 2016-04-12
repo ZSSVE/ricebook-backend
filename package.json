@@ -17,7 +17,8 @@
     "express": "^4.13.4",
     "md5": "^2.1.0",
     "mongoose": "^4.4.10",
-    "morgan": "^1.7.0"
+    "morgan": "^1.7.0",
+    "request": "^2.69.0"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5",
