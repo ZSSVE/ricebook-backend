@@ -19,7 +19,8 @@
     "mongoose": "^4.4.10",
     "morgan": "^1.7.0",
     "request": "^2.69.0",
-    "express-session": "^1.13.0"
+    "express-session": "^1.13.0",
+    "passport":"^0.3.2"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5",
