@@ -3,7 +3,6 @@ var express = require('express');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var request = require('request');
-//var qs = require('querystring');
 var session = require('express-session');
 var passport = require('passport');
 
@@ -25,11 +24,9 @@ require('./app_server/posts.js').setup(app);
 require('./app_server/profile.js').setup(app);
 
 // Get the port from the environment, i.e., Heroku sets it.
-//if (process.env.NODE_ENV !== "production") {
-//    require('dot-env')
-//}
 var port = process.env.PORT || 3000;
 
+// It enables Cross-Origin Resource Sharing for AJAX requests.
 function middleware(req, res, next) {
     if (req.headers.origin) {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
@@ -41,6 +38,7 @@ function middleware(req, res, next) {
     next();
 }
 
+// Test function.
 function sayHello(req, res) {
     res.send({"hello": "world"})
 }

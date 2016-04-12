@@ -1,4 +1,3 @@
-// It contain endpoints and stubs for posts functionality.
 exports.setup = function (app) {
     app.get('/statuses/:users*?', isLoggedIn, getStatues);
     app.get('/status', isLoggedIn, getStatus);
@@ -149,7 +148,7 @@ function getPictures(req, res) {
 }
 
 
-//TODO.
+// TODO. Set avatar for logged in user.
 function setPicture(req, res) {
     var username = req.user;
     res.send({

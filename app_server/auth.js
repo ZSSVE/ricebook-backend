@@ -1,4 +1,3 @@
-// It contain stubs for authorization functionality.
 exports.setup = function (app) {
     app.post('/login', login);
     app.put('/logout', isLoggedIn, logout);
@@ -16,27 +15,28 @@ var crypto = require('crypto');
 var md5 = require('md5');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
+
+// A map stored in memory for session handling
 var _cookieKey = 'sid';
 var _sessionUser = {};
+
+// Third-party login.
 var port = "3000";
 var defaultAvatar = "https://tracker.moodle.org/secure/attachment/30912/f3.png";
 var defaultStatus = "Becoming a Web Developer!";
 
+// Register a new user.
+//
+// A User document containing his username, salt and salted hash will be stored in the database.
+// A Profile document containg his email, zipcode as well as default avatar and default status will also be stored.
 function register(req, res) {
     var username = req.body.username;
     var password = req.body.password;
     var salt = crypto.randomBytes(16).toString('hex');
     var saltedHash = getHash(username, password, salt);
 
-    //User.remove({}, function(err) {
-    //    console.log('********** collection User removed**********')
-    //});
-    //Profile.remove({}, function(err) {
-    //    console.log('********** collection Profile removed**********')
-    //});
-
     new User({username: username, salt: salt, hash: saltedHash}).save(function (err, result) {
-        console.log('done with save new user', username, "result: ", result)
+        if (err) return err.json({error: "Error saving" + username + "User"});
     });
     new Profile({
         username: username,
@@ -46,16 +46,8 @@ function register(req, res) {
         zipcode: req.body.zipcode,
         picture: defaultAvatar
     }).save(function (err, result) {
-        console.log('done with save new user profile', username, "result: ", result)
+        if (err) return err.json({error: "Error saving " + username + "Profile"});
     });
-
-    User.find({}, function (err, result) {
-        console.log("all users:", result)
-    });//TODO remove
-    Profile.find({}, function (err, result) {
-        console.log("all profiles", result)
-    });//TODO remove
-
     res.send({username: username, result: "success"})
 
 }
@@ -75,12 +67,10 @@ function login(req, res) {
         var userObj = userObjs[0];
         if (!userObj || getHash(username, password, userObj.salt) !== userObj.hash) {
             res.sendStatus(401);
-            console.log("State: Unauthorized!");
             return
         }
 
         // Success login
-        console.log("State: Success!");
         var sessionKey = getHash(new Date().getTime() + userObj.username);
         _sessionUser[sessionKey] = username;
 
@@ -94,8 +84,9 @@ function login(req, res) {
     });
 }
 
+// Middleware function assures that the user has already logged in for sensitive operations followed
+// and also store the username for downstream endpoints.
 function isLoggedIn(req, res, next) {
-    console.log("Checking if logged in...");
     var sessionKey = req.cookies[_cookieKey];
 
     if (req.isAuthenticated()) {
@@ -114,7 +105,6 @@ function isLoggedIn(req, res, next) {
 }
 
 function setPassword(req, res) {
-    // Middleware isLoggedIn assures that the user has already logged in.
     var username = req.user;
     var newPassword = req.body.password;
     var salt = crypto.randomBytes(16).toString('hex');
@@ -130,13 +120,13 @@ function setPassword(req, res) {
 
 // Remove the user information stored and clear cookie.
 function logout(req, res) {
-    //req.logout();
     var sessionKey = req.cookies[_cookieKey];
     delete _sessionUser[sessionKey];
     res.clearCookie(_cookieKey);
     res.send("OK");
 }
 
+// Helper function. It returns a hashed string for variable number of arguments
 function getHash() {
     var args = Array.prototype.slice.call(arguments);
     return md5(args.join(":"))
@@ -144,6 +134,7 @@ function getHash() {
 
 
 // Facebook login
+
 var users = {};
 var config = {
     clientID: '636790953145162',

@@ -1,4 +1,3 @@
-// It contains just stubs for following functionality.
 exports.setup = function (app) {
     app.get('/following/:user*?', isLoggedIn, getFollowings);
     app.put('/following/:user', isLoggedIn, addFollowing);

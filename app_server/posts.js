@@ -7,65 +7,6 @@ exports.setup = function (app) {
 var isLoggedIn = require('./auth.js').isLoggedIn;
 var getHash = require('./auth.js').getHash;
 var Post = require('./model.js').Post;
-//Post.remove({}, function(err) {
-//    console.log('********** collection Post removed **********')
-//});
-//
-//new Post({
-//    id: getHash("sz32test", new Date().getTime(), 1),
-//    author: 'sz32test',
-//    img: "http://40.media.tumblr.com/59332776ff90eb35500a4d5a0e09b383/tumblr_mxmhunKOl71qz83rmo1_1280.jpg",
-//    date: new Date().getTime(),
-//    body: 'This is my first post',
-//    comments: [{
-//        commentId: getHash("sz32test", new Date().getTime(), 2),
-//        author: "sz32test",
-//        body: 'This is my first comment',
-//        date: new Date().getTime()
-//    }]
-//}).save();
-//
-//new Post({
-//    id: getHash("sz32test", new Date().getTime(), 3),
-//    author: 'sz32test',
-//    img: "https://sgartpaintings.files.wordpress.com/2009/11/monet-harbour-at-argenteuil.jpg",
-//    date: new Date().getTime(),
-//    body: 'This is my second post',
-//    comments: [{
-//        commentId: getHash("sz32test", new Date().getTime(), 4),
-//        author: "sz32test",
-//        body: 'This is my 2nd comment',
-//        date: new Date().getTime()
-//    }]
-//}).save();
-//
-//new Post({
-//    id: getHash("sz32test", new Date().getTime(), 5),
-//    author: 'sz32test',
-//    img: "http://cdn.ek.aero/us/english/images/Houston_tcm272-2374719.jpg",
-//    date: new Date().getTime(),
-//    body: 'This is my 3rd post',
-//    comments: [{
-//        commentId: getHash("sz32test", new Date().getTime(), 6),
-//        author: "sz32test",
-//        body: 'This is my 3rd comment',
-//        date: new Date().getTime()
-//    }]
-//}).save();
-//
-//new Post({
-//    id: getHash("sz32test", new Date().getTime(), 7),
-//    author: 'sz32test',
-//    img: "https://upload.wikimedia.org/wikipedia/commons/d/de/Lovett_Hall.jpg",
-//    date: new Date().getTime(),
-//    body: 'This is my 4th post',
-//    comments: [{
-//        commentId: getHash("sz32test", new Date().getTime(), 8),
-//        author: "sz32test",
-//        body: 'This is my 4th comment',
-//        date: new Date().getTime()
-//    }]
-//}).save();
 
 function addPost(req, res) {
     var username = req.user;
