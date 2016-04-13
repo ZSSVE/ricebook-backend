@@ -23,7 +23,7 @@
     "passport-facebook": "^2.1.0",
     "redis": "^2.6.0-1",
     "request": "^2.69.0",
-    "redis-commands": "1.1.0",
+    "redis-commands": "1.1.0"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5",
