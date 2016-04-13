@@ -16,9 +16,10 @@ var md5 = require('md5');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
-// A map stored in memory for session handling
+
+var REDIS_URL = "redis://h:pcinkgsmv6hcnufv1b4ekgu4f9b@ec2-54-227-250-102.compute-1.amazonaws.com:14679";
+var redis = require('redis').createClient(REDIS_URL);
 var _cookieKey = 'sid';
-var _sessionUser = {};
 
 // Third-party login.
 var port = "3000";
@@ -72,7 +73,7 @@ function login(req, res) {
 
         // Success login
         var sessionKey = getHash(new Date().getTime() + userObj.username);
-        _sessionUser[sessionKey] = username;
+        redis.set(sessionKey, username);
 
         // Set cookie
         res.cookie(_cookieKey, sessionKey, {maxAge: 3600 * 1000, httpOnly: true});
@@ -95,13 +96,18 @@ function isLoggedIn(req, res, next) {
         return res.sendStatus(401); // Unauthorized
     }
 
-    var username = _sessionUser[sessionKey];
-    if (username) {
-        req.user = username;
-        return next()
-    } else {
-        res.sendStatus(401);
-    }
+    //var username = _sessionUser[sessionKey];
+    var username = null;
+    redis.get(sessionKey, function (err, user) {
+        username = user;
+        if (username) {
+            req.user = username;
+            return next()
+        } else {
+            res.sendStatus(401);
+        }
+    });
+
 }
 
 function setPassword(req, res) {
@@ -121,7 +127,9 @@ function setPassword(req, res) {
 // Remove the user information stored and clear cookie.
 function logout(req, res) {
     var sessionKey = req.cookies[_cookieKey];
-    delete _sessionUser[sessionKey];
+    redis.del(sessionKey, function (err, reply) {
+        if (err) return res.json({error: "Error deleting cookie"});
+    });
     res.clearCookie(_cookieKey);
     res.send("OK");
 }

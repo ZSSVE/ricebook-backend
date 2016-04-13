@@ -47,6 +47,7 @@ function setPost(req, res) {
     if (commentID === null) {
         Post.findOneAndUpdate({id: postID}, {body: req.body.body}, function (err, post) {
             if (err) throw err;
+            post.body = req.body.body;
             res.send({"posts": [post]})
 
         })

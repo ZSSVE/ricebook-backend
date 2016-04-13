@@ -96,6 +96,7 @@ function setEmail(req, res) {
         });
     });
 }
+
 // Get the zipcode for the requested user.
 function getZipcode(req, res) {
     var username = req.params.user ? req.params.user.split(',')[0] : req.user;
@@ -125,7 +126,6 @@ function setZipcode(req, res) {
     });
 }
 
-
 // Get the picture address for the requested users.
 function getPictures(req, res) {
     var usernames = req.params.user ? req.params.user.split(',') : [req.user];
@@ -146,7 +146,6 @@ function getPictures(req, res) {
         });
     }).catch(console.error)
 }
-
 
 // TODO. Set avatar for logged in user.
 function setPicture(req, res) {
