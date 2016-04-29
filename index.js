@@ -10,9 +10,8 @@ var app = express();
 app.use(bodyParser.json());
 app.use(logger("default"));
 app.use(cookieParser());
-app.use(middleware);
+app.use(enableCORS);
 app.use(session({secret: '6ea79c5a2d31f6ddc66451c7b40ef163'}));
-
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
@@ -25,9 +24,13 @@ require('./app_server/profile.js').setup(app);
 
 // Get the port from the environment, i.e., Heroku sets it.
 var port = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').load()
+}
+//require('./uploadCloudinary.js').setup(app);
 
 // It enables Cross-Origin Resource Sharing for AJAX requests.
-function middleware(req, res, next) {
+function enableCORS(req, res, next) {
     if (req.headers.origin) {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Authorization,X-Session-Id');

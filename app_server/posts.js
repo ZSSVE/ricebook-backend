@@ -1,36 +1,35 @@
 // Endpoints that contains all user profile information except passwords which is in auth.js
 exports.setup = function (app) {
     app.get('/posts/:id*?', isLoggedIn, getPost);
-    app.post('/post', isLoggedIn, addPost);
+    app.post('/post', isLoggedIn, uploadImage, setPicture);
     app.put('/posts/:id', isLoggedIn, setPost)
 };
 var isLoggedIn = require('./auth.js').isLoggedIn;
 var getHash = require('./auth.js').getHash;
 var Post = require('./model.js').Post;
+var setPicture = require('./profile.js').setPicture;
+var uploadImage = require('./profile.js').uploadImage;
+var Profile = require('./model.js').Profile;
 
-function addPost(req, res) {
-    var username = req.user;
-    new Post({
-        'id': getHash(username, new Date().getTime()),
-        'author': username,
-        'body': req.body.body,
-        'date': new Date().getTime(),
-        "comments": []
-    }).save(function (err, result) {
-        if (err) {
-            return handleError(err);
-        }
-        res.send({'posts': [result]});
-    });
-}
 
 function getPost(req, res) {
     var requestedId = req.params.id ? req.params.id.split(',')[0] : null;
+
+    // If no ID  is specified, 10 posts of logged in user and his user will be returned.
     if (requestedId === null) {
-        Post.find({}).sort('-date').exec(function (err, posts) {
-            if (err) throw err;
-            res.send({'posts': posts});
-        })
+        var username = req.user;
+
+        Profile.find({username: username}, function (err, result) {
+            var user = result[0];
+            var usersToQuery = user.following;
+            usersToQuery.push(username);
+            Post.find({'author': {$in: usersToQuery}}).sort('-date').limit(10).exec(function (err, posts) {
+                if (err) throw err;
+                res.send({'posts': posts});
+            });
+        });
+
+        // If an ID is specified, post with this ID will be returned.
     } else {
         Post.find({id: requestedId}, function (err, posts) {
             if (err) throw err;

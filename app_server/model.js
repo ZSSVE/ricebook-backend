@@ -12,12 +12,12 @@ var commentSchema = new mongoose.Schema({
 });
 
 var postSchema = new mongoose.Schema({
-    id: String, author: String, img: String, date: Date, body: String,
+    id: String, author: String, img: String, date: Date, body: String, img: String,
     comments: [commentSchema]
 });
 
 var userSchema = new mongoose.Schema({
-    username: String, salt: String, hash: String
+    username: String, salt: String, hash: String, fbID: String
 });
 
 var profileSchema = new mongoose.Schema({

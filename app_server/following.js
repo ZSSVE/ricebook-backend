@@ -7,6 +7,7 @@ exports.setup = function (app) {
 var isLoggedIn = require('./auth.js').isLoggedIn;
 var Profile = require('./model.js').Profile;
 
+
 function getFollowings(req, res) {
     var username = req.params.user ? req.params.user.split(',')[0] : req.user;
     Profile.find({username: username}, function (err, result) {

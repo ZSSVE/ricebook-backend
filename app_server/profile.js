@@ -7,11 +7,13 @@ exports.setup = function (app) {
     app.get('/zipcode/:user*?', isLoggedIn, getZipcode);
     app.put('/zipcode', isLoggedIn, setZipcode);
     app.get('/pictures/:user*?', isLoggedIn, getPictures);
-    app.put('/picture', isLoggedIn, setPicture);
+    app.put('/picture', isLoggedIn, uploadImage, setPicture);
 };
 
 var isLoggedIn = require('./auth.js').isLoggedIn;
 var Profile = require('./model.js').Profile;
+var Post = require('./model.js').Post;
+var getHash = require('./auth.js').getHash;
 
 // Get the statuses for multiple users.
 function getStatues(req, res) {
@@ -21,7 +23,7 @@ function getStatues(req, res) {
     var promises = usernames.map(function (username) {
         return new Promise(function (resolve, reject) {
             Profile.find({username: username}, function (err, result) {
-                if (err) throw err;
+                if (err) return err.json({error: "Error finding " + username + "status"});
                 var user = result[0];
                 statuses.push({"username": user.username, "status": user.status});
                 resolve();
@@ -39,7 +41,7 @@ function getStatues(req, res) {
 function getStatus(req, res) {
     var username = req.user;
     Profile.find({username: username}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error finding " + username + "status"});
         res.send({
             'statuses': [{
                 'username': result[0].username,
@@ -58,7 +60,7 @@ function setStatus(req, res) {
         return
     }
     Profile.update({username: username}, {$set: {status: newStatus}}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error updating " + username + "status"});
         res.send({
             'statuses': [{
                 'username': username,
@@ -72,7 +74,7 @@ function setStatus(req, res) {
 function getEmail(req, res) {
     var username = req.params.user ? req.params.user.split(',')[0] : req.user;
     Profile.find({username: username}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error getting " + username + "email"});
         res.send({
             'username': result[0].username,
             'email': result[0].email
@@ -89,7 +91,7 @@ function setEmail(req, res) {
         return
     }
     Profile.update({username: username}, {$set: {email: newEmail}}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error updating " + username + "email"});
         res.send({
             'username': username,
             'email': newEmail
@@ -101,7 +103,7 @@ function setEmail(req, res) {
 function getZipcode(req, res) {
     var username = req.params.user ? req.params.user.split(',')[0] : req.user;
     Profile.find({username: username}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error getting " + username + "zipcode"});
         res.send({
             'username': result[0].username,
             'zipcode': result[0].zipcode
@@ -118,7 +120,7 @@ function setZipcode(req, res) {
         return
     }
     Profile.update({username: username}, {$set: {zipcode: newZipcode}}, function (err, result) {
-        if (err) throw err;
+        if (err) return err.json({error: "Error updating " + username + "zipcode"});
         res.send({
             'username': username,
             'zipcode': newZipcode
@@ -147,12 +149,74 @@ function getPictures(req, res) {
     }).catch(console.error)
 }
 
-// TODO. Set avatar for logged in user.
+
+// Upload files to Cloudinary
+var multer = require('multer');
+var stream = require('stream');
+var cloudinary = require('cloudinary');
+
+// Only one single file  named images will be uploaded.
+var uploadImage = multer().single('image');
+
+
+// Dispatch the received picture.
+//
+// If a picture is included in the request, it will add a post with picture or update logged-in user
+// avatar based on the endpoint of request. If no picture is uploaded, a plain post without picture
+// will be added.
 function setPicture(req, res) {
     var username = req.user;
-    res.send({
-        'username': username,
-        'picture': "http://lasalletech.com/image/product-icons/technician-cts-icon.png"
-    });
+
+    // Check if a picture is included in the request.
+    if (req.file) {
+        var publicName = "image" + req.file + new Date().getTime();
+        var uploadStream = cloudinary.uploader.upload_stream(function (result) {
+            // Determine if this is for posts or profiles based on the endpoint of requirement.
+            if (req.url === "/post") {
+                new Post({
+                    'id': getHash(username, new Date().getTime()),
+                    'author': username,
+                    'body': req.body.body,
+                    'date': new Date().getTime(),
+                    "comments": [],
+                    "img": result.url
+                }).save(function (err, result) {
+                    if (err) return res.json({error: "Error adding post"});
+                    res.send({'posts': [result]});
+                });
+            }
+            if (req.url === "/picture") {
+                Profile.update({username: username}, {$set: {picture: result.url}}, function (err, result) {
+                    if (err) throw err;
+                    res.send({
+                        'username': username,
+                        'picture': result.picture
+                    });
+                });
+            }
+        }, {public_id: publicName});
+
+        //Create a passthrough stream to pipe the buffer to the uploadStream for cloudinary.
+        var s = new stream.PassThrough();
+        s.end(req.file.buffer);
+        s.pipe(uploadStream);
+        // Instruct cloudinary to end the upload.
+        s.on('end', uploadStream.end);
+
+    } else {
+        new Post({
+            'id': getHash(username, new Date().getTime()),
+            'author': username,
+            'body': req.body.body,
+            'date': new Date().getTime(),
+            "comments": []
+        }).save(function (err, result) {
+            if (err) return res.json({error: "Error adding post"});
+            res.send({'posts': [result]});
+        });
+    }
 }
+
+exports.uploadImage = uploadImage;
+exports.setPicture = setPicture;
 
