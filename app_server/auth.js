@@ -27,7 +27,6 @@ var redis = require('redis').createClient(REDIS_URL);
 var _cookieKey = 'sid';
 
 // Third-party login.
-var port = "3000";
 var defaultAvatar = "https://tracker.moodle.org/secure/attachment/30912/f3.png";
 var defaultStatus = "Becoming a Web Developer!";
 
@@ -151,7 +150,7 @@ var users = {};
 var config = {
     clientID: '636790953145162',
     clientSecret: '6ea79c5a2d31f6ddc66451c7b40ef163',
-    callbackURL: 'http://localhost:' + port + '/callback',
+    callbackURL: 'https://whispering-ravine-99303.herokuapp.com/callback',
     profileFields: ['email', 'name']
 };
 
@@ -236,14 +235,14 @@ function fbRelogin(fbID, username, res) {
 
         // Set cookie
         res.cookie(_cookieKey, sessionKey, {maxAge: 3600 * 1000, httpOnly: true});
-        res.redirect('http://localhost:8080/#/main');
+        res.redirect('https://lit-sands-78221.herokuapp.com#/main');
     });
 }
 
 
 // Send user back to log in page if the Facebook log in failed.
 function fail(req, res) {
-    res.redirect('http://localhost:8080/');
+    res.redirect('https://lit-sands-78221.herokuapp.com/');
 }
 
 
