@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var url = 'mongodb://heroku_rdfvcllv:5evd29304oojssq8vm9e1ucn5a@ds041032.mlab.com:41032/heroku_rdfvcllv';
+//var url = 'mongodb://heroku_rdfvcllv:5evd29304oojssq8vm9e1ucn5a@ds041032.mlab.com:41032/heroku_rdfvcllv';
 
 if (process.env.MONGOLAB_URI) {
     url = process.env.MONGOLAB_URI;
