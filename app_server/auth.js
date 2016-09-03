@@ -22,7 +22,7 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
 
-var REDIS_URL = "redis://h:pcinkgsmv6hcnufv1b4ekgu4f9b@ec2-54-227-250-102.compute-1.amazonaws.com:14679";
+var REDIS_URL = "redis://h:pe6a7a6gh5dgpvbcrhor9j7mfbl@ec2-54-227-250-102.compute-1.amazonaws.com:14679";
 var redis = require('redis').createClient(REDIS_URL);
 var _cookieKey = 'sid';
 
